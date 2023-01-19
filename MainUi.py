@@ -10,8 +10,10 @@ class MyWindow(QMainWindow):
         super().__init__()
 
         self.init_ui()
-        self.uiManager = UiManager()
-        #self.uiManager.start()
+        self.textManager = TextManager()
+        self.textManager.file_check_sig.connect(self.file_check)
+        self.uiManager = UiManager(self.textManager)
+        # self.uiManager.start()
 
     def init_ui(self):
         self.setGeometry(500, 500, 400, 300)
@@ -21,6 +23,7 @@ class MyWindow(QMainWindow):
         self.statusLabel = QLabel("시작 전 입니다", self)
         self.statusLabel.move(10, 20)
         self.statusLabel.setAlignment(Qt.AlignCenter)
+
         font1 = self.statusLabel.font()
         font1.setPointSize(20)
         self.statusLabel.setFont(font1)
@@ -42,12 +45,25 @@ class MyWindow(QMainWindow):
         startBtn.clicked.connect(self.start)
         closeBtn.clicked.connect(QCoreApplication.instance().quit)
 
-
-    def file_check_sig(self, file_check):
+    @pyqtSlot(bool)
+    def file_check(self, file_check):
+        print(23)
+        # TextManager가 init에서 바로 선언되어야지 pyqtSlot이 동작한다.
+        # 호출한 클래스에서만 전달하는듯.
         if not file_check:
             self.statusLabel.setText('txt파일이 없습니다.')
+            font1 = self.statusLabel.font()
+            font1.setPointSize(20)
+            self.statusLabel.setFont(font1)
+            self.statusLabel.adjustSize()
         else:
             self.statusLabel.setText('파일이 존재합니다')
+            font1 = self.statusLabel.font()
+            font1.setPointSize(20)
+            self.statusLabel.setFont(font1)
+            self.statusLabel.adjustSize()
 
     def start(self):
-        self.uiManager.resume(self.txtNameEdit.text())
+        self.textManager.init_val()
+        self.textManager.file_name_set(self.txtNameEdit.text())
+        self.textManager.start()

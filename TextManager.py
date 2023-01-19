@@ -1,10 +1,12 @@
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import *
 import os
 
 import MainUi
 from ExcelManager import ExcelManager
 
 BASE_DIR = os.getcwd()
+
+
 class TextManager(QThread):
     file_check_sig = pyqtSignal(bool)  # 사용자 정의 시그널
 
@@ -14,6 +16,7 @@ class TextManager(QThread):
         self.file_cnt = 1
         self.file_name = ""
         self.excelManager = ExcelManager()
+        self.file_check = False
 
     def init_val(self):
         self.file_check = True
@@ -34,10 +37,15 @@ class TextManager(QThread):
                 break
 
         if self.file_cnt == 1:
-            self.file_check_sig.emit(False)
+            print(2)
+            self.file_check = False
+            self.file_check_sig.emit(self.file_check)
+            print(4)
             return
         else:
-            self.file_check_sig.emit(True)
+            print(3)
+            self.file_check = True
+            self.file_check_sig.emit(self.file_check)
 
         with open('merge.txt', 'w') as outfile:
             for filename in filenames:
@@ -47,7 +55,6 @@ class TextManager(QThread):
         self.excelManager.init_val()
         self.excelManager.file_name_set(self.file_name)
         self.slicing_file()
-
 
     def file_name_set(self, file_name):
         self.file_name = file_name
